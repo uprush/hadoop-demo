@@ -21,12 +21,14 @@ usage_exit() {
         echo "  setup-slaves: set up hadoop slaves"
         echo "  setup-jobhistory: set up YARN job history server"
         echo "  setup-hive: set up Hive and HCatalog"
+        echo "  setup-zookeeper: set up Zookeeper"
         echo "  namenode: format / start / stop namenode"
         echo "  datanode: start / stop datanode"
         echo "  yarn_rm: start / stop YARN resource manager"
         echo "  yarn_nm: start / stop YARN node manager"
         echo "  jobhistory: start / stop YARN job history"
         echo "  hive_server: start / stop Hive server2"
+        echo "  zookeeper: start / stop Zookeeper"
         echo "  tweets: Hive example to copy / create / load / query tweets table"
         echo
         echo "-e command: run adhoc command on all nodes"
@@ -73,13 +75,16 @@ function pre-setup() {
 
     # Configure HDP
     source $DEMO_HOME/conf/env.sh
-    sed -i "s/TODO-LIST-OF-NAMENODE-DIRS/$LIST_OF_NAMENODE_DIRS/g;s/TODO-LIST-OF-DATA-DIRS/$LIST_OF_DATA_DIRS/g;s/TODO-LIST-OF-YARN-LOCAL-DIRS/$LIST_OF_YARN_LOCAL_DIRS/g;s/TODO-LIST-OF-YARN-LOCAL-LOG-DIRS/$LIST_OF_YARN_LOCAL_LOG_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+    sed -i "s/TODO-LIST-OF-NAMENODE-DIRS/$LIST_OF_NAMENODE_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+    sed -i "s/TODO-LIST-OF-DATA-DIRS/$LIST_OF_DATA_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+    sed -i "s/TODO-LIST-OF-YARN-LOCAL-DIRS/$LIST_OF_YARN_LOCAL_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+    sed -i "s/TODO-LIST-OF-YARN-LOCAL-LOG-DIRS/$LIST_OF_YARN_LOCAL_LOG_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+    sed -i "s/TODO-ZOOKEEPER-DATA-DIR/$ZOOKEEPER_DATA_DIR/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
 
     # Distribute setup bundle
-    # EXEC="scp -r $DEMO_HOME /home/ubuntu/"
     for NODE in `cat $DEMO_HOME/conf/cluster/all_nodes`
     do
-        scp -r $DEMO_HOME $NODE:/home/ubuntu/
+        rsync -vzr --delete $DEMO_HOME/ $NODE:$DEMO_HOME/
     done
 }
 
@@ -114,6 +119,10 @@ function setup-jobhistory() {
 
 function setup-hive() {
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "sudo $DEMO_HOME/setup-hive.sh"
+}
+
+function setup-zookeeper() {
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "sudo $DEMO_HOME/setup-zookeeper.sh"
 }
 
 function jobhistory() {
@@ -244,6 +253,27 @@ function hive_server() {
     echo "Started Hiveserver2 on `cat $DEMO_HOME/conf/cluster/masters`"
 }
 
+function zookeeper() {
+    if [[ "x$SUBCMD" == "x" ]]; then
+        usage_exit
+    fi
+
+    case $SUBCMD in
+        start )
+              EXEC="sudo su - $ZOOKEEPER_USER -c 'source /etc/zookeeper/conf/zookeeper-env.sh ; export ZOOCFGDIR=/etc/zookeeper/conf;/usr/lib/zookeeper/bin/zkServer.sh start >> /var/log/zookeeper/zoo.out 2>&1'"
+            ;;
+        stop )
+              EXEC="sudo su - $ZOOKEEPER_USER -c 'source /etc/zookeeper/conf/zookeeper-env.sh ; export ZOOCFGDIR=/etc/zookeeper/conf;/usr/lib/zookeeper/bin/zkServer.sh stop >> /var/log/zookeeper/zoo.out 2>&1'"
+            ;;
+        * )
+            usage_exit
+            ;;
+    esac
+
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "$EXEC"
+    echo "Started Zookeeper on `cat $DEMO_HOME/conf/cluster/masters`"
+}
+
 function tweets() {
     if [[ "x$SUBCMD" == "x" ]]; then
         usage_exit
@@ -299,6 +329,9 @@ case $CMD in
     setup-hive )
         setup-hive
         ;;
+    setup-zookeeper )
+        setup-zookeeper
+        ;;
     namenode )
         namenode
         ;;
@@ -316,6 +349,9 @@ case $CMD in
         ;;
     hive_server )
         hive_server
+        ;;
+    zookeeper )
+        zookeeper
         ;;
     tweets )
         tweets

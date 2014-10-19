@@ -9,6 +9,7 @@ source $DEMO_HOME/functions.sh
 
 function install_hive() {
   apt-get install -y hive hive-hcatalog
+  usermod $HIVE_USER -s /bin/bash
 
   # mysql driver
   # apt-get install -y libmysql-java
