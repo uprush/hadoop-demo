@@ -15,20 +15,24 @@ usage_exit() {
         echo "  start-master-instances: start EC2 instances for hadoop masters"
         echo "  start-slave-instances: start EC2 instances for hadoop slaves"
         echo "  start-metastore: start RDS instance for HCatalog/Hive metastore"
-        echo "  check_reachabilities: check reachability for all nodes"
+        echo "  check-reachability: check reachability for all nodes"
         echo "  pre-setup: prepare for hadoop setup, runs on all nodes"
         echo "  setup-masters: set up hadoop masters"
         echo "  setup-slaves: set up hadoop slaves"
         echo "  setup-jobhistory: set up YARN job history server"
         echo "  setup-hive: set up Hive and HCatalog"
         echo "  setup-zookeeper: set up Zookeeper"
+        echo "  setup-storm-master: set up Storm master"
+        echo "  setup-storm-worker: set up Storm worker"
         echo "  namenode: format / start / stop namenode"
         echo "  datanode: start / stop datanode"
-        echo "  yarn_rm: start / stop YARN resource manager"
-        echo "  yarn_nm: start / stop YARN node manager"
+        echo "  yarn-rm: start / stop YARN resource manager"
+        echo "  yarn-nm: start / stop YARN node manager"
         echo "  jobhistory: start / stop YARN job history"
-        echo "  hive_server: start / stop Hive server2"
+        echo "  hive-server: start / stop Hive server2"
         echo "  zookeeper: start / stop Zookeeper"
+        echo "  storm-master: start / stop Storm master"
+        echo "  storm-worker: start / stop Storm worker"
         echo "  tweets: Hive example to copy / create / load / query tweets table"
         echo
         echo "-e command: run adhoc command on all nodes"
@@ -58,7 +62,7 @@ if [[ "x$CMD" == "x" ]]; then
 fi
 
 # functions
-function check_reachabilities() {
+function check-reachability() {
     for NODE in `cat $DEMO_HOME/conf/cluster/all_nodes`
     do
         ssh -o StrictHostKeyChecking=no $NODE "exit" && echo "$NODE    OK"
@@ -123,6 +127,14 @@ function setup-hive() {
 
 function setup-zookeeper() {
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "sudo $DEMO_HOME/setup-zookeeper.sh"
+}
+
+function setup-storm-master() {
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "sudo $DEMO_HOME/setup-storm.sh master"
+}
+
+function setup-storm-worker() {
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/slaves "sudo $DEMO_HOME/setup-storm.sh worker"
 }
 
 function jobhistory() {
@@ -195,7 +207,7 @@ function datanode() {
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/slaves "$EXEC"
 }
 
-function yarn_rm() {
+function yarn-rm() {
     if [[ "x$SUBCMD" == "x" ]]; then
         usage_exit
     fi
@@ -215,7 +227,7 @@ function yarn_rm() {
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "$EXEC"
 }
 
-function yarn_nm() {
+function yarn-nm() {
     if [[ "x$SUBCMD" == "x" ]]; then
         usage_exit
     fi
@@ -235,7 +247,7 @@ function yarn_nm() {
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/slaves "$EXEC"
 }
 
-function hive_server() {
+function hive-server() {
     if [[ "x$SUBCMD" == "x" ]]; then
         usage_exit
     fi
@@ -271,7 +283,55 @@ function zookeeper() {
     esac
 
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "$EXEC"
-    echo "Started Zookeeper on `cat $DEMO_HOME/conf/cluster/masters`"
+    echo "$SUBCMD Zookeeper on `cat $DEMO_HOME/conf/cluster/masters`"
+}
+
+function storm-master() {
+    if [[ "x$SUBCMD" == "x" ]]; then
+        usage_exit
+    fi
+
+    case $SUBCMD in
+        start )
+              EXEC="sudo supervisorctl start all"
+            ;;
+        stop )
+              EXEC="sudo supervisorctl stop all"
+            ;;
+        status )
+              EXEC="sudo supervisorctl status"
+            ;;
+        * )
+            usage_exit
+            ;;
+    esac
+
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "$EXEC"
+    echo "$SUBCMD Storm master on `cat $DEMO_HOME/conf/cluster/masters`"
+}
+
+function storm-worker() {
+    if [[ "x$SUBCMD" == "x" ]]; then
+        usage_exit
+    fi
+
+    case $SUBCMD in
+        start )
+              EXEC="sudo supervisorctl start all"
+            ;;
+        stop )
+              EXEC="sudo supervisorctl stop all"
+            ;;
+        status )
+              EXEC="sudo supervisorctl status"
+            ;;
+        * )
+            usage_exit
+            ;;
+    esac
+
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/slaves "$EXEC"
+    echo "$SUBCMD Storm worker on `cat $DEMO_HOME/conf/cluster/slaves`"
 }
 
 function tweets() {
@@ -302,8 +362,8 @@ function tweets() {
 
 # main routine
 case $CMD in
-    check_reachabilities )
-        check_reachabilities
+    check-reachability )
+        check-reachability
         ;;
     pre-setup )
         pre-setup
@@ -332,26 +392,38 @@ case $CMD in
     setup-zookeeper )
         setup-zookeeper
         ;;
+    setup-storm-master )
+        setup-storm-master
+        ;;
+    setup-storm-worker )
+        setup-storm-worker
+        ;;
     namenode )
         namenode
         ;;
     datanode )
         datanode
         ;;
-    yarn_rm )
-        yarn_rm
+    yarn-rm )
+        yarn-rm
         ;;
-    yarn_nm )
-        yarn_nm
+    yarn-nm )
+        yarn-nm
         ;;
     jobhistory )
         jobhistory
         ;;
-    hive_server )
-        hive_server
+    hive-server )
+        hive-server
         ;;
     zookeeper )
         zookeeper
+        ;;
+    storm-master )
+        storm-master
+        ;;
+    storm-worker )
+        storm-worker
         ;;
     tweets )
         tweets

@@ -51,3 +51,6 @@ METASTORE_DB_PORT='TODO_METASTORE_RDS_PORT'
 METASTORE_DB_DRIVER='com.mysql.jdbc.Driver'
 
 MYSQL_CONNECTOR_URL='TODO_URL_TO_DOWNLOAD_mysql-connector-java-5.1.33-bin.jar'
+
+# for storm
+STORM_LOCAL_DIR='/mnt/storm/local'
