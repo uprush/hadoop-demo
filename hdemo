@@ -34,6 +34,7 @@ usage_exit() {
         echo "  storm-master: start / stop Storm master"
         echo "  storm-worker: start / stop Storm worker"
         echo "  tweets: Hive example to copy / create / load / query tweets table"
+        echo "  hellostorm: a simple Strom demo, supported subcommands: package / run"
         echo
         echo "-e command: run adhoc command on all nodes"
         echo
@@ -360,6 +361,26 @@ function tweets() {
     pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "$EXEC"
 }
 
+function hellostorm() {
+    if [[ "x$SUBCMD" == "x" ]]; then
+        usage_exit
+    fi
+
+    case $SUBCMD in
+        package )
+            EXEC="$DEMO_HOME/hellostorm.sh package"
+            ;;
+        run )
+            EXEC="$DEMO_HOME/hellostorm.sh run"
+            ;;
+        * )
+            usage_exit
+            ;;
+    esac
+
+    pdsh -l ubuntu -R ssh -w ^$DEMO_HOME/conf/cluster/masters "$EXEC"
+}
+
 # main routine
 case $CMD in
     check-reachability )
@@ -427,6 +448,9 @@ case $CMD in
         ;;
     tweets )
         tweets
+        ;;
+    hellostorm )
+        hellostorm
         ;;
     * )
         run_cmd_on_all_nodes
