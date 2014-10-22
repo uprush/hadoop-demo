@@ -22,7 +22,8 @@ function run() {
       echo "Pacakge not exist: $DEMO_HOME/storm/hellostorm/target/hellostorm-1.0-SNAPSHOT.jar"
       echo "Invoking 'package' sub command..."
   fi
-  sudo -u storm storm jar $DEMO_HOME/storm/hellostorm/target/hellostorm-1.0-SNAPSHOT.jar com.uprush.hdemo.HelloStorm
+  MASTER_HOST=`cat $DEMO_HOME/conf/cluster/masters`
+  sudo -u storm storm jar -c nimbus.host=$MASTER_HOST $DEMO_HOME/storm/hellostorm/target/hellostorm-1.0-SNAPSHOT.jar com.uprush.hdemo.HelloStorm hellostorm
 }
 
 if [[ "$SUBCMD" == "package" ]]; then
