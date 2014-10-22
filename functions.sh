@@ -7,6 +7,16 @@ source $DEMO_HOME/conf/env.sh
 source $DEMO_HOME/hdp_helper/scripts/directories.sh
 source $DEMO_HOME/hdp_helper/scripts/usersAndGroups.sh
 
+function escape_path() {
+  IN_PATH=$1
+  if [[ "x$IN_PATH" == "x" ]]; then
+    echo ""
+  else
+    echo "$IN_PATH" | sed -e 's/\//\\\//g' > /tmp/escaped
+    cat /tmp/escaped
+  fi
+}
+
 function setup_common() {
   apt-get update -y
   setup_open_jdk
@@ -97,22 +107,25 @@ function configure_core_hadoop() {
   sed -i "s/TODO-NAMENODE-HOSTNAME:PORT/$MASTER_HOSTNAME:8020/g" $HELPER_CONF_DIR/core-site.xml
 
   # hdfs-site.xml
-  sed -i "s/TODO-DFS-DATA-DIR/$LIST_OF_DATA_DIRS/g" $HELPER_CONF_DIR/hdfs-site.xml
+  ESCAPED_LIST_OF_DATA_DIRS=`escape_path "$LIST_OF_DATA_DIRS"`
+  sed -i "s/TODO-DFS-DATA-DIR/$ESCAPED_LIST_OF_DATA_DIRS/g" $HELPER_CONF_DIR/hdfs-site.xml
   sed -i "s/TODO-NAMENODE-HOSTNAME/$MASTER_HOSTNAME/g" $HELPER_CONF_DIR/hdfs-site.xml
-  sed -i "s/TODO-DFS-NAME-DIR/$LIST_OF_NAMENODE_DIRS/g" $HELPER_CONF_DIR/hdfs-site.xml
+
+  ESCAPED_LIST_OF_NAMENODE_DIRS=`escape_path "$LIST_OF_NAMENODE_DIRS"`
+  sed -i "s/TODO-DFS-NAME-DIR/$ESCAPED_LIST_OF_NAMENODE_DIRS/g" $HELPER_CONF_DIR/hdfs-site.xml
 
   # yarn-site.xml
   sed -i "s/TODO-RESOURCEMANAGERNODE-HOSTNAME/$MASTER_HOSTNAME/g" $HELPER_CONF_DIR/yarn-site.xml
   sed -i "s/--- Secure cluster/Secure cluster/g" $HELPER_CONF_DIR/yarn-site.xml # fix error xml syntax. bug?
-  sed -i "s/\/hadoop\/yarn\/local/$LIST_OF_YARN_LOCAL_DIRS/g" $HELPER_CONF_DIR/yarn-site.xml
-  sed -i "s/\/hadoop\/yarn\/log/$LIST_OF_YARN_LOCAL_LOG_DIRS/g" $HELPER_CONF_DIR/yarn-site.xml
+
+  ESCAPED_LIST_OF_YARN_LOCAL_DIRS=`escape_path "$LIST_OF_YARN_LOCAL_DIRS"`
+  sed -i "s/\/hadoop\/yarn\/local/$ESCAPED_LIST_OF_YARN_LOCAL_DIRS/g" $HELPER_CONF_DIR/yarn-site.xml
+
+  ESCAPED_LIST_OF_YARN_LOCAL_LOG_DIRS=`escape_path "$LIST_OF_YARN_LOCAL_LOG_DIRS"`
+  sed -i "s/\/hadoop\/yarn\/log/$ESCAPED_LIST_OF_YARN_LOCAL_LOG_DIRS/g" $HELPER_CONF_DIR/yarn-site.xml
 
   # mapred-site.xml
   sed -i "s/TODO-JOBHISTORYNODE-HOSTNAME/$MASTER_HOSTNAME/g" $HELPER_CONF_DIR/mapred-site.xml
-
-  # (Optional) compression
-
-  # (Optional) memory settings
 
   # copy settings
   rm -rf $HADOOP_CONF_DIR

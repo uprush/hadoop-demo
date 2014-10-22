@@ -26,11 +26,11 @@ SLAVE_NODE_COUNT=2
 ##   - Multiple EBS for NN/SNN directories
 ##   - Multiple instance stores for DD/YARN directories
 ##     Number of instance stores depends on EC2 instance size
-LIST_OF_NAMENODE_DIRS="\/mnt\/hadoop\/hdfs\/nn"
-LIST_OF_DATA_DIRS="\/mnt\/hadoop\/hdfs\/dn"
-LIST_OF_YARN_LOCAL_DIRS="\/mnt\/hadoop\/yarn\/local"
-LIST_OF_YARN_LOCAL_LOG_DIRS="\/mnt\/hadoop\/yarn\/logs"
-ZOOKEEPER_DATA_DIR="\/mnt\/zookeeper\/data"
+LIST_OF_NAMENODE_DIRS="/mnt/hadoop/hdfs/nn"
+LIST_OF_DATA_DIRS="/mnt/hadoop/hdfs/dn"
+LIST_OF_YARN_LOCAL_DIRS="/mnt/hadoop/yarn/local"
+LIST_OF_YARN_LOCAL_LOG_DIRS="/mnt/hadoop/yarn/logs"
+ZOOKEEPER_DATA_DIR="/mnt/zookeeper/data"
 
 ## HDP repository
 HDP_REPO="http://public-repo-1.hortonworks.com/HDP/ubuntu12/2.1.5.0/hdp.list"

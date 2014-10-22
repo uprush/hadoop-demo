@@ -79,12 +79,20 @@ function pre-setup() {
     rm hdp_manual_install_rpm_helper_files-2.1.5.695-1.tar.gz
 
     # Configure HDP
-    source $DEMO_HOME/conf/env.sh
-    sed -i "s/TODO-LIST-OF-NAMENODE-DIRS/$LIST_OF_NAMENODE_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
-    sed -i "s/TODO-LIST-OF-DATA-DIRS/$LIST_OF_DATA_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
-    sed -i "s/TODO-LIST-OF-YARN-LOCAL-DIRS/$LIST_OF_YARN_LOCAL_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
-    sed -i "s/TODO-LIST-OF-YARN-LOCAL-LOG-DIRS/$LIST_OF_YARN_LOCAL_LOG_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
-    sed -i "s/TODO-ZOOKEEPER-DATA-DIR/$ZOOKEEPER_DATA_DIR/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+    ESCAPED_LIST_OF_NAMENODE_DIRS=`escape_path "$LIST_OF_NAMENODE_DIRS"`
+    sed -i "s/TODO-LIST-OF-NAMENODE-DIRS/$ESCAPED_LIST_OF_NAMENODE_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+
+    ESCAPED_LIST_OF_DATA_DIRS=`escape_path "$LIST_OF_DATA_DIRS"`
+    sed -i "s/TODO-LIST-OF-DATA-DIRS/$ESCAPED_LIST_OF_DATA_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+
+    ESCAPED_LIST_OF_YARN_LOCAL_DIRS=`escape_path "$LIST_OF_YARN_LOCAL_DIRS"`
+    sed -i "s/TODO-LIST-OF-YARN-LOCAL-DIRS/$ESCAPED_LIST_OF_YARN_LOCAL_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+
+    ESCAPED_LIST_OF_YARN_LOCAL_LOG_DIRS=`escape_path "$LIST_OF_YARN_LOCAL_LOG_DIRS"`
+    sed -i "s/TODO-LIST-OF-YARN-LOCAL-LOG-DIRS/$ESCAPED_LIST_OF_YARN_LOCAL_LOG_DIRS/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
+
+    ESCAPED_ZOOKEEPER_DATA_DIR=`escape_path "$ZOOKEEPER_DATA_DIR"`
+    sed -i "s/TODO-ZOOKEEPER-DATA-DIR/$ESCAPED_ZOOKEEPER_DATA_DIR/g" $DEMO_HOME/hdp_helper/scripts/directories.sh
 
     # Distribute setup bundle
     for NODE in `cat $DEMO_HOME/conf/cluster/all_nodes`
