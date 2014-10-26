@@ -38,7 +38,9 @@ function configure_zk() {
   ZOO_HELPER_DIR=$DEMO_HOME/hdp_helper/configuration_files/zookeeper
   source $DEMO_HOME/conf/env.sh
   MASTER_HOSTNAME=`cat $DEMO_HOME/conf/cluster/masters`
-  sed -i "s/TODO-ZOOKEEPER-DATA-DIR/$ZOOKEEPER_DATA_DIR/g" $ZOO_HELPER_DIR/zoo.cfg
+
+  ESCAPED_ZOOKEEPER_DATA_DIR=`escape_path "$ZOOKEEPER_DATA_DIR"`
+  sed -i "s/TODO-ZOOKEEPER-DATA-DIR/$ESCAPED_ZOOKEEPER_DATA_DIR/g" $ZOO_HELPER_DIR/zoo.cfg
   sed -i "s/TODO-ZKSERVER-HOSTNAME/$MASTER_HOSTNAME/g" $ZOO_HELPER_DIR/zoo.cfg
 
   rm -r $ZOOKEEPER_CONF_DIR
